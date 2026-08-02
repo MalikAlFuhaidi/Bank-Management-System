@@ -85,4 +85,4 @@ This repository will be expanded in future stages with additional features, incl
 
 ## 📄 License
 
-This project is licensed under the **MIT License**.
+This project is licensed under the **MIT License** – feel free to use and modify it.
