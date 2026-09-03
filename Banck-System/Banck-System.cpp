@@ -239,6 +239,41 @@ void ShowAllClientsScreen()
 
 }
 
+void ShowTotalBalances()
+{
+    vector <sClient> vClients = LoadCleintsDataFromFile(ClientsFileName);
+
+    cout << "\n\t\t\t\t\tBalances List (" << vClients.size() << ") Client(s).";
+    cout << "\n_______________________________________________________";
+    cout << "_________________________________________\n" << endl;
+
+    cout << "| " << left << setw(15) << "Accout Number";
+    cout << "| " << left << setw(40) << "Client Name";
+    cout << "| " << left << setw(12) << "Balance";
+    cout << "\n_______________________________________________________";
+    cout << "_________________________________________\n" << endl;
+
+    double TotalBalances = 0;
+
+    if (vClients.size() == 0)
+        cout << "\t\t\t\tNo Clients Available In the System!";
+    else
+    {
+        for (sClient Client : vClients)
+        {
+
+            PrintClientRecordBalanceLine(Client);
+            TotalBalances += Client.AccountBalance;
+
+            cout << endl;
+        }
+    }
+
+    cout << "\n_______________________________________________________";
+    cout << "_________________________________________\n" << endl;
+    cout << "\t\t\t\t\t   Total Balances = " << TotalBalances;
+}
+
 void PrintClientCard(sClient Client)
 {
     cout << "\nThe following are the client details:\n";
@@ -609,6 +644,11 @@ void ShowWithDrawScreen()
     DepositBalanceToClientByAccountNumber(AccountNumber, Amount * -1, vClients);
 }
 
+void ShowTotalBalancesScreen()
+{
+    ShowTotalBalances();
+}
+
 enum enTransactionsMenueOptions { eDeposit = 1, eWithdraw = 2, eShowTotalBalance = 3, eShowMainMenue = 4 };
 
 enum enMainMenueOptions { eListClients = 1, eAddNewClient = 2, eDeleteClient = 3, eUpdateClient = 4, eFindClient = 5, eShowTransactionsMenue = 6, eExit = 7 };
@@ -651,7 +691,7 @@ void PerfromTranactionsMenueOption(enTransactionsMenueOptions TransactionMenueOp
         case enTransactionsMenueOptions::eShowTotalBalance:
         {
             system("cls");
-            cout << "\nTotal Balances feature will be added soon.\n";
+            ShowTotalBalancesScreen();
             break;
         }
 
