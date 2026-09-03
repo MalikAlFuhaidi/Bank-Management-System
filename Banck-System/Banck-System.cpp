@@ -456,6 +456,31 @@ bool UpdateClientByAccountNumber(string AccountNumber, vector <sClient>& vClient
 
 }
 
+bool DepositBalanceToClientByAccountNumber(string AccountNumber, double Amount, vector <sClient>& vClients)
+{
+    char Answer = 'n';
+
+    cout << "\n\nAre you sure you want perfrom this transaction? y/n ? ";
+    cin >> Answer;
+    if (Answer == 'y' || Answer == 'Y')
+    {
+        for (sClient& C : vClients)
+        {
+            if (C.AccountNumber == AccountNumber)
+            {
+                C.AccountBalance += Amount;
+                SaveCleintsDataToFile(ClientsFileName, vClients);
+                cout << "\n\nDone Successfully. New balance is: " << C.AccountBalance;
+
+                return true;
+            }
+
+        }
+        return false;
+    }
+    return false;
+}
+
 string ReadClientAccountNumber()
 {
     string AccountNumber = "";
