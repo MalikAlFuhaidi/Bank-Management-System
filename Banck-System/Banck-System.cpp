@@ -5,11 +5,19 @@
 #include <iomanip>
 
 using namespace std;
-const string ClientsFileName = "Clients.txt";
 
 
-void ShowMainMenue();
-void ShowTransactionsMenue();
+enum enTransactionsMenueOptions { eDeposit = 1, eWithdraw = 2, eShowTotalBalance = 3, eShowMainMenue = 4 };
+
+enum enMainMenueOptions { eListClients = 1, eAddNewClient = 2, eDeleteClient = 3, eUpdateClient = 4, eFindClient = 5, eShowTransactionsMenue = 6, eExit = 7 };
+
+
+enum enPermissions
+{
+    eAllPerm = -1, eListClientsPerm = 1, eAddNewClientPerm = 2, eDeleteCleintPerm = 4,
+    eUpdateClientPerm = 8, eFindClientPerm = 16, eTransactionsMenuePerm = 32, eManageUsersPerm = 64
+};
+
 
 struct sClient
 {
@@ -22,6 +30,22 @@ struct sClient
 
 
 };
+
+struct stUsers
+{
+    string UserName;
+    string Password;
+    int Permissions = 0;
+    bool MarkForDelete = false;
+};
+
+stUsers CurrentUser;
+const string ClientsFileName = "Clients.txt";
+const string UsersFileName = "Users.txt";
+
+void ShowMainMenue();
+void ShowTransactionsMenue();
+
 
 vector<string> SplitString(string S1, string Delim)
 {
@@ -85,6 +109,52 @@ string ConvertRecordToLine(sClient Client, string Seperator = "#//#")
     return stClientRecord;
 
 }
+
+string ConvertUserRecordToLine(stUsers User, string Seperator = "#//#")
+{
+    string stUserRecord = "";
+
+    stUserRecord += User.UserName + Seperator;
+    stUserRecord += User.Password + Seperator;
+    stUserRecord += to_string(User.Permissions) + Seperator;
+
+    return stUserRecord;
+}
+
+stUsers ConvertUserLineToRecord(string Line, string Seperator = "#//#")
+{
+    vector <string> vUsersData = SplitString(Line, Seperator);
+    stUsers User;
+
+    User.UserName = vUsersData.at(0);
+    User.Password = vUsersData.at(1);
+    User.Permissions = stoi(vUsersData.at(2)); // cast string to int(short).
+
+    return User;
+}
+
+vector <stUsers> LoadUsersDataFromFile(string FileName)
+{
+    fstream MyFile;
+    MyFile.open(FileName, ios::in); // Read Mode
+
+    vector <stUsers> vUsersData;
+
+    if (MyFile.is_open())
+    {
+        string Line;
+        stUsers User;
+
+        while (getline(MyFile, Line))
+        {
+            User = ConvertUserLineToRecord(Line);
+            vUsersData.push_back(User);
+        }
+        MyFile.close();
+    }
+    return vUsersData;
+}
+
 
 bool ClientExistsByAccountNumber(string AccountNumber, string FileName)
 {
@@ -342,6 +412,28 @@ bool MarkClientForDeleteByAccountNumber(string AccountNumber, vector <sClient>& 
 
     return false;
 
+}
+
+vector <stUsers> SaveUsersDataToFile(string FileName, vector<stUsers>& vUsers)
+{
+    fstream MyFile;
+    MyFile.open(FileName, ios::out); //Overwrite
+
+    if (MyFile.is_open())
+    {
+        string DataLine = "";
+        for (stUsers User : vUsers)
+        {
+            //we only write records that are not marked for delete.  
+            if (User.MarkForDelete == false)
+            {
+                DataLine = ConvertUserRecordToLine(User);
+                MyFile << DataLine << endl;
+            }
+        }
+        MyFile.close();
+    }
+    return vUsers;
 }
 
 vector <sClient> SaveCleintsDataToFile(string FileName, vector <sClient> vClients)
@@ -649,9 +741,6 @@ void ShowTotalBalancesScreen()
     ShowTotalBalances();
 }
 
-enum enTransactionsMenueOptions { eDeposit = 1, eWithdraw = 2, eShowTotalBalance = 3, eShowMainMenue = 4 };
-
-enum enMainMenueOptions { eListClients = 1, eAddNewClient = 2, eDeleteClient = 3, eUpdateClient = 4, eFindClient = 5, eShowTransactionsMenue = 6, eExit = 7 };
 
 void GoBackToMainMenue()
 {
