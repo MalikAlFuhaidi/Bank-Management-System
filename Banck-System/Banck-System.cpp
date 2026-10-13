@@ -11,7 +11,6 @@ enum enTransactionsMenueOptions { eDeposit = 1, eWithdraw = 2, eShowTotalBalance
 
 enum enMainMenueOptions { eListClients = 1, eAddNewClient = 2, eDeleteClient = 3, eUpdateClient = 4, eFindClient = 5, eShowTransactionsMenue = 6, eExit = 7 };
 
-
 enum enPermissions
 {
     eAllPerm = -1, eListClientsPerm = 1, eAddNewClientPerm = 2, eDeleteCleintPerm = 4,
@@ -45,6 +44,7 @@ const string UsersFileName = "Users.txt";
 
 void ShowMainMenue();
 void ShowTransactionsMenue();
+short ReadPermissions();
 
 
 vector<string> SplitString(string S1, string Delim)
@@ -170,6 +170,27 @@ bool UserExistByUserName(string UserName, stUsers& DesiredUser, string FileName)
     return false;
 }
 
+void ShowAccessDeniedMessage()
+{
+    cout << "\n-----------------------------------\n";
+    cout << "Access Denied,\n";
+    cout << "You Don't Have Permission To Do This,\n";
+    cout << "Please Contact Your Admin.\n";
+    cout << "\n-----------------------------------\n";
+}
+
+bool CheckAccessPermission(enPermissions Permission)
+{
+    if (CurrentUser.Permissions == enPermissions::eAllPerm)
+    {
+        return true;
+    }
+    if ((CurrentUser.Permissions & Permission) == Permission)
+        return true;
+    else
+        return false;
+}
+
 stUsers ReadNewUser()
 {
     stUsers User;
@@ -188,10 +209,7 @@ stUsers ReadNewUser()
 
     getline(cin >> ws, User.Password);
 
-    //User.Permissions = ReadPermissions();
-
-    // Permissions will be assigned in the permissions phase.
-    User.Permissions = 0;
+    User.Permissions = ReadPermissions();
 
     return User;
 }
@@ -634,7 +652,7 @@ bool DeleteUser(string UserName, vector<stUsers>& vUsers)
             MarkUserFroDelete(UserName, vUsers);
             SaveUsersDataToFile(UsersFileName, vUsers);
 
-            //Refresh Clients 
+            //Refresh Clients
             vUsers = LoadUsersDataFromFile(UsersFileName);
 
             cout << "\n\nUser Deleted Successfully.";
@@ -657,7 +675,7 @@ stUsers ChangeUserRecord(string UserName)
     cout << "Enter Password? ";
     getline(cin >> ws, User.Password);
 
-    //User.Permissions = ReadPermissions();
+    User.Permissions = ReadPermissions();
 
     return User;
 }
@@ -1024,6 +1042,80 @@ void ShowFindUserScreen()
     string UserName = ReadUserName();
     vector<stUsers> vUsers = LoadUsersDataFromFile(UsersFileName);
     FindUser(UserName, vUsers);
+}
+
+short ReadPermissions()
+{
+    short Permissions = 0;
+
+    char Answer = 'Y';
+    cout << "\n\nDo You Want to give full access? Y/N? ";
+    cin >> Answer;
+
+    if (toupper(Answer) == 'Y')
+    {
+        return -1;
+    }
+
+    cout << "\n\nDo You Want to give access to\n\n";
+
+    cout << "\nShow Client List? Y/N? ";
+    cin >> Answer;
+
+    if (toupper(Answer) == 'Y')
+    {
+        Permissions += enPermissions::eListClientsPerm;
+    }
+
+    cout << "\nAdd New Client? Y/N? ";
+    cin >> Answer;
+
+    if (toupper(Answer) == 'Y')
+    {
+        Permissions += enPermissions::eAddNewClientPerm;
+    }
+
+    cout << "\nDelete Client? Y/N? ";
+    cin >> Answer;
+
+    if (toupper(Answer) == 'Y')
+    {
+        Permissions += enPermissions::eDeleteCleintPerm;
+    }
+
+    cout << "\nUpdate Client? Y/N? ";
+    cin >> Answer;
+
+    if (toupper(Answer) == 'Y')
+    {
+        Permissions += enPermissions::eUpdateClientPerm;
+    }
+
+    cout << "\nFind Client? Y/N? ";
+    cin >> Answer;
+
+    if (toupper(Answer) == 'Y')
+    {
+        Permissions += enPermissions::eFindClientPerm;
+    }
+
+    cout << "\nTransactions? Y/N? ";
+    cin >> Answer;
+
+    if (toupper(Answer) == 'Y')
+    {
+        Permissions += enPermissions::eTransactionsMenuePerm;
+    }
+
+    cout << "\nManage Users? Y/N? ";
+    cin >> Answer;
+
+    if (toupper(Answer) == 'Y')
+    {
+        Permissions += enPermissions::eManageUsersPerm;
+    }
+
+    return Permissions;
 }
 
 void GoBackToMainMenue()
